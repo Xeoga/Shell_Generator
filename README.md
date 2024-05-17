@@ -16,7 +16,7 @@ Caracteristici
 ## Instalare
 Pentru a instala CustomTkinter, folosește pip:
 ```bash
-pip install customtkinter
+pip install -i requirements.txt
 ```
 ## Rulare
 Clonează repository-ul și rulează scriptul principal:

