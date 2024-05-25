@@ -1,12 +1,70 @@
 import customtkinter as cutk
 import emoji # Not working at the moment
-
+import requests
+import json
 
 
 PORT = int()
 IP = str("Your_IP")
 SHELL = "bash" # By default is `bash`
 shell_option = ["/bin/sh", "bash", "/bin/bash", "cmd", "powershell", "pwsh", "ash", "bsh", "csh", "ksh", "zsh", "pdksh", "tcsh", "mksh", "dash"]
+
+
+def check_cve(cve_id):
+    url = f"https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve_id}"
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for non-200 status codes
+        cve_info = response.json()
+        return cve_info
+    except (requests.exceptions.RequestException, json.JSONDecodeError) as e:
+        print("Error:", e)
+        return None
+
+def open_check_CVE_NIST():
+    new_window = cutk.CTkToplevel(app)
+    new_window.title("NIST API")
+    new_window.geometry("500x500")
+    
+    label = cutk.CTkLabel(new_window, text="Enter CVE ID:")
+    label.pack()
+    
+    entry = cutk.CTkEntry(new_window)
+    entry.pack()
+    
+    def get_cve_info():
+        cve_id = entry.get()
+        cve_info = check_cve(cve_id)
+        if cve_info and "vulnerabilities" in cve_info:
+            # Assuming we want to print details of the first vulnerability if multiple vulnerabilities are returned
+            vulnerability = cve_info["vulnerabilities"][0]
+            cve = vulnerability["cve"]
+            cve_details = f"CVE ID: {cve['id']}\n"
+            cve_details += "Description:\n"
+            for description in cve["descriptions"]:
+                cve_details += f"- {description['value']} [{description['lang']}]\n"
+        
+        # Check if 'metrics' key exists before accessing it
+            if "metrics" in vulnerability:
+                cve_details += "Severity:\n"
+                for metric in vulnerability["metrics"].get("cvssMetricV3", []):
+                    cve_details += f"- CVSS v3 Base Score: {metric['cvssData']['baseScore']} ({metric['cvssData']['baseSeverity']})\n"
+                for metric in vulnerability["metrics"].get("cvssMetricV2", []):
+                    cve_details += f"- CVSS v2 Base Score: {metric['cvssData']['baseScore']} ({metric['baseSeverity']})\n"
+            else:
+                cve_details += "Severity: Not available\n"
+
+            result_label.configure(text=cve_details)
+        else:
+            result_label.configure(text="CVE not found or error in fetching details.")
+
+    check_button = cutk.CTkButton(new_window, text="Check CVE", command=get_cve_info)
+    check_button.pack()
+    
+    result_label = cutk.CTkLabel(new_window, text="")
+    result_label.pack()
+    
+    new_window.mainloop()
 
 # Function to clear the scrollable frame
 def clear_frame(frame):
@@ -132,7 +190,7 @@ main_frame.grid(pady=30,padx=30, row=0, column=0, sticky='nsew')
 
 main_label = cutk.CTkLabel(master=main_frame, text='Shell Generator', font=("Roboto", 32))
 main_label.grid(pady=10, padx=10,row=0, columnspan=2, sticky='nsew')
-API_check_CVE = cutk.CTkButton(master=main_frame,text="CVE Check")
+API_check_CVE = cutk.CTkButton(master=main_frame,text="CVE Check", command=open_check_CVE_NIST)
 API_check_CVE.grid(pady=10, padx=10,row=0, column=2, sticky='nsew')
 
 ip_port_frame = cutk.CTkFrame(master=main_frame, corner_radius=10)
