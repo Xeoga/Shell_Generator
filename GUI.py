@@ -12,10 +12,10 @@ shell_option = ["/bin/sh", "bash", "/bin/bash", "cmd", "powershell", "pwsh", "as
 
 
 def check_cve(cve_id):
-    url = f"https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve_id}" #Testat pentru ID:CVE-2019-1010218
+    url = f"https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve_id}" #Tested for ID:CVE-2019-1010218
     try:
         response = requests.get(url)
-        response.raise_for_status()  # Raise an error for non-200 status codes
+        response.raise_for_status()
         cve_info = response.json()
         return cve_info
     except (requests.exceptions.RequestException, json.JSONDecodeError) as e:
@@ -37,7 +37,6 @@ def open_check_CVE_NIST():
         cve_id = entry.get()
         cve_info = check_cve(cve_id)
         if cve_info and "vulnerabilities" in cve_info:
-            # Assuming we want to print details of the first vulnerability if multiple vulnerabilities are returned
             vulnerability = cve_info["vulnerabilities"][0]
             cve = vulnerability["cve"]
             cve_details = f"CVE ID: {cve['id']}\n"
@@ -67,7 +66,6 @@ def open_check_CVE_NIST():
 
     new_window.mainloop()
 
-# Function to clear the scrollable frame
 def clear_frame(frame):
     for widget in frame.winfo_children():
         widget.destroy()
@@ -75,7 +73,7 @@ def clear_frame(frame):
 def copy_to_clipboard():
     app.clipboard_clear()
     app.clipboard_append(shell_label.cget("text"))
-    app.update()  # necessary to update the clipboard contents
+    app.update() 
 
 def set_shell(shell_from_user):
     global SHELL
@@ -87,18 +85,13 @@ def get_the_port_from_user(event):
     PORT = port_entry.get()
     print(f"nc -lvnp {PORT}")
     if int(PORT) <= 1024:
-        cat_image = Image.open("emoji/cry_cat.png")  # Replace with your emoji image path
-        cat_image = cat_image.resize((40, 40), Image.LANCZOS)  # Resize the image if necessary
+        cat_image = Image.open("emoji/cry_cat.png")  
+        cat_image = cat_image.resize((40, 40), Image.LANCZOS)  
         cat_photo = ImageTk.PhotoImage(cat_image)
 
-                                                                    #cat_label = cutk.CTkLabel(master=listent_frame, text="", image=cat_photo)
-                                                                    #cat_label.grid(row=1, column=1)
-        listent_label.configure(text=f"   sudo nc -lvnp {PORT}",font=("Arial", 15), text_color="red")       #Nu am inteles de ce dar lucreaza si fara asta HZ de ce ?????
+        listent_label.configure(text=f"   sudo nc -lvnp {PORT}",font=("Arial", 15), text_color="red")   
         listent_label.configure(compound="left", image=cat_photo)
-                                                                    #cat_label.image = cat_photo
     else:
-        if 'cat_photo' in locals():
-            cat_photo.destroy()
         listent_label.configure(text=f"nc -lvnp {PORT}")
 
 def get_the_ip_from_user(event):
@@ -249,7 +242,7 @@ scrollable_frame = cutk.CTkScrollableFrame(master=shell_frame, width=150, height
 scrollable_frame.grid(row=1,column=0)
 
 pepega_image = Image.open("emoji/happy_pepe.png")
-pepega_image = pepega_image.resize((50, 50), Image.LANCZOS)  # Resize the image if necessary
+pepega_image = pepega_image.resize((50, 50), Image.LANCZOS) 
 pepega_photo = ImageTk.PhotoImage(pepega_image)
 
 shell_label = cutk.CTkLabel(master=shell_frame, text="   Enter your IP and Port PLS!!!", font=("Aria", 15), wraplength=400)
