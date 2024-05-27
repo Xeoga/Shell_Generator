@@ -24,7 +24,7 @@ Shell Generator V1 este o aplicație cu interfață grafică (GUI) construită c
 
 1. **Clonează Repositorul:**
 ```bash
-git clone https://github.com/yourusername/shell-generator.git
+git clone https://github.com/Xeoga/Shell_Generator.git
 cd shell-generator
 ```
 2. **Instalează Bibliotecile Necesare:**
